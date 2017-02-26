@@ -1,0 +1,35 @@
+---
+# Install Prometheus Node Exporter.
+#
+# @see https://github.com/prometheus/node_exporter
+
+- name: download and untar node-exporter tarball
+  shell: "wget -qO - {{ prometheus_node_exporter_tarball_url }} | tar xzf -"
+  args:
+    chdir: "{{ prometheus_install_path }}"
+    creates: "{{ prometheus_node_exporter_daemon_dir }}"
+    warn: False
+
+- name: set node-exporter permissions, owner and group
+  file:
+    path: "{{ prometheus_node_exporter_daemon_dir }}/node_exporter"
+    owner: "{{ prometheus_user }}"
+    group: "{{ prometheus_group }}"
+    mode: 0755
+
+- name: mkdir for prometheus data
+  file:
+    path: "{{ prometheus_db_path }}"
+    state: directory
+    owner: "{{ prometheus_user }}"
+    group: "{{ prometheus_group }}"
+    mode: 0750
+
+- name: copy node-exporter start script
+  template:
+    src: "../templates/node_exporter.sysvinit.{{ ansible_os_family|lower }}.sh.j2"
+    dest: "/etc/init.d/node_exporter"
+    mode: 0755
+
+- name: start node-exporter service
+  service: name=node_exporter enabled=yes state=started

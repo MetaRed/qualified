@@ -1,0 +1,19 @@
+---
+# main tasks file for monitor
+
+# Prometheus
+- name: install prometheus-server
+  include: prometheus/prometheus-server.tasks.yml
+  tags: [prometheus,prometheus-server]
+
+- name: install node-exporter
+  include: prometheus/node-exporter.tasks.yml
+  tags: [prometheus,node-exporter]
+
+- name: install mysqld-exporter.
+  include: prometheus/mysqld-exporter.tasks.yml
+  tags: [prometheus,mysqld-exporter]
+
+- name: build prometheus-server-builder
+  include: prometheus/prometheus-slim-builder.tasks.yml
+  tags: [prometheus,prometheus-slim]

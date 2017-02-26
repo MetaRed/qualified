@@ -1,0 +1,54 @@
+---
+# Install Prometheus Mysqld Exporter.
+#
+# @see https://github.com/prometheus/mysqld_exporter
+
+- name: create mysqld_exporter db user
+  mysql_user:
+    login_host: localhost
+    login_user: root
+    host: localhost
+    name: exporter
+    password: 12345
+    priv: "*.*:PROCESS,REPLICATION CLIENT,SELECT"
+    state: present
+
+- name: download and untar mysqld_exporter tarball
+  shell: "wget -qO - {{ prometheus_mysqld_exporter_tarball_url }} | tar xzf -"
+  args:
+    chdir: "{{ prometheus_install_path }}"
+    creates: "{{ prometheus_mysqld_exporter_daemon_dir }}/mysqld_exporter"
+    warn: False
+
+- name: set mysqld_exporter permissions, owner and group
+  file:
+    path: "{{ prometheus_mysqld_exporter_daemon_dir }}/mysqld_exporter"
+    owner: "{{ prometheus_user }}"
+    group: "{{ prometheus_group }}"
+    mode: 0755
+
+- name: mkdir mysqld_exporter data
+  file:
+    path: "{{ prometheus_db_path }}"
+    state: directory
+    owner: "{{ prometheus_user }}"
+    group: "{{ prometheus_group }}"
+    mode: 0750
+
+- name: copy mysqld_exporter configuration
+  template:
+    src: "../templates/mysqld_exporter.yml.j2"
+    dest: "/etc/prometheus/tgroups/mysqld_exporter.yml"
+    owner: "{{ prometheus_user }}"
+    group: "{{ prometheus_group }}"
+
+
+- name: copy mysqld_exporter INIT script to server
+  template:
+    src: "../templates/mysqld_exporter.sysvinit.{{ ansible_os_family|lower }}.sh.j2"
+
+    dest: "/etc/init.d/mysqld_exporter"
+    mode: 0755
+
+- name: start mysqld_exporter service
+  service: name=mysqld_exporter enabled=yes state=started

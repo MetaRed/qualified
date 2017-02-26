@@ -1,0 +1,8 @@
+---
+- hosts: all
+  strategy: free
+  remote_user: root
+  become: true
+  roles:
+    - /home/travis/build/MetaRed/MetaRed.percona
+    - ""

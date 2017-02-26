@@ -1,0 +1,29 @@
+---
+
+dependency:
+  name: galaxy
+
+driver:
+  name: docker
+
+verifier:
+  name: testinfra
+  options:
+    r: "p"
+    color: "yes"
+    cov_report: term
+    cov: "."
+
+ansible:
+  config_file: ansible.cfg
+  playbook: playbook.yml
+
+docker:
+  containers:
+    - name: prometheus_mysqld_exporter
+      image: ubuntu
+      image_version: '14.04'
+      port_bindings:
+        9090: 9090
+      ansible_groups:
+        - group1

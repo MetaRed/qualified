@@ -1,0 +1,6 @@
+---
+- hosts: localhost
+  connection: local
+  strategy: free
+  roles:
+    - monitor_test_dockerfile

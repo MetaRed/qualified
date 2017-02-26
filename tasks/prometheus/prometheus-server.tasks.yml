@@ -1,0 +1,74 @@
+---
+# Install Prometheus Server.
+#
+# @see https://github.com/prometheus/prometheus
+# @see http://prometheus.io/docs/introduction/getting_started/
+
+- name: install prometheus dependencies
+  apt: pkg={{ item }} state=present
+  with_items:
+        - wget
+  environment:
+    DEBIAN_FRONTEND: noninteractive
+
+- name: create prometheus group
+  group: name={{ prometheus_group }} state=present
+
+- name: create prometheus user
+  user:
+    name: "{{ prometheus_user }}"
+    group: "{{ prometheus_group }}"
+    createhome: no
+    shell: /sbin/nologin
+    comment: "Prometheus User"
+    system: yes
+    state: present
+
+- name: mkdir for prometheus installation
+  file:
+    path: "{{ item }}"
+    state: directory
+    owner: "{{ prometheus_user }}"
+    group: "{{ prometheus_group }}"
+    mode: 0755
+  with_items:
+    - "{{ prometheus_install_path }}"
+    - "{{ prometheus_config_path }}"
+    - "{{ prometheus_log_path }}"
+    - "{{ prometheus_pid_path }}"
+
+- name: download and untar prometheus tarball
+  shell: "wget -qO - {{ prometheus_tarball_url }} | tar xzvf -"
+  args:
+    chdir: "{{ prometheus_install_path }}"
+    creates: "{{ prometheus_daemon_dir }}"
+    warn: False
+
+- name: mkdir for prometheus config and data
+  file:
+    path: "{{ item }}"
+    state: directory
+    owner: "{{ prometheus_user }}"
+    group: "{{ prometheus_group }}"
+    mode: 0750
+  with_items:
+    - "{{ prometheus_rule_path }}"
+    - "{{ prometheus_file_sd_config_path }}"
+    - "{{ prometheus_db_path }}"
+
+- name: copy prometheus INIT script to server
+  template:
+    src: "../templates/prometheus.sysvinit.{{ ansible_os_family|lower }}.sh.j2"
+    dest: "/etc/init.d/prometheus"
+    mode: 0755
+
+- name: copy prometheus main config file to server
+  template:
+    src: "prometheus.yml.j2"
+    dest: "{{ prometheus_config_path }}/prometheus.yml"
+    owner: "{{ prometheus_user }}"
+    group: "{{ prometheus_group }}"
+    validate: "{{ prometheus_daemon_dir }}/promtool check-config %s"
+
+- name: start prometheus service
+  service: name=prometheus enabled=yes state=started

@@ -1,0 +1,17 @@
+---
+# Install Prometheus Server.
+#
+# @see https://github.com/prometheus/prometheus
+# @see http://prometheus.io/docs/introduction/getting_started/
+
+- name: builder image compiles prometheus-server-slim
+  command: docker build -t ansible-prom-builder . -f ../../Dockerfile
+#  docker_image:
+  #  path: /path/to/build/dir/with/dockerfile
+#    path: ../
+#    name: prometheus-builder
+#    tag: "1.4.1"
+#    tag: "{{ prometheus_version }}"
+#     buildargs:
+#       log_volume: /var/log/myapp
+#       listen_port: 9090

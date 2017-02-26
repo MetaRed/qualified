@@ -1,0 +1,21 @@
+galaxy_info:
+  author: Richard Lopez
+  description: Installs software used for the monitoring and alerting of operating systems and services.
+  company: Meta.Red, LLC
+  license: Apache 2.0
+  min_ansible_version: 2.0
+
+  platforms:
+  - name: Ubuntu
+    versions:
+    - precise
+    - trusty
+
+  galaxy_tags:
+    - monitoring
+    - alerting
+    - graphing
+    - prometheus
+    - linux
+
+dependencies: []

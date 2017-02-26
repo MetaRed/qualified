@@ -1,0 +1,19 @@
+*~
+*#
+.#*
+\#*#
+.*.sw[a-z]
+*.un~
+.DS_Store
+
+# Ansible unused
+handlers/*
+vars/*
+
+# Molecule
+.site.retry
+.molecule/*
+.molecule.yml
+
+# Coverage
+.*coverage/*
